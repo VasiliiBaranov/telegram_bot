@@ -1,7 +1,10 @@
 import random
+import os
 import telebot
 import random
 import pickle
+from dotenv import load_dotenv
+
 
 
 rating_dict = {} # ratind_dict(user) = how many problems have solved
@@ -18,9 +21,9 @@ def load_data():
         rates = []
         last_messages = dict()
 
-load_data() #TODO
+load_data()
 
-key = "6503445568:AAG6bIW_bRMvjHl4WEvWXaOA-euG12RZ60Y" # telebram-bot api-key
+key = os.getenv("key") # telebram-bot api-key
 
 bot = telebot.TeleBot(key)
 
@@ -84,7 +87,8 @@ def create_multi_problem():
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     bot.reply_to(message, "Welcome to the High Arithmetic Bot! Type /problem to get a math problem.")
-    rating_dict[message.from_user.id] = 0
+    if (message.from_user.id not in rating_dict.keys()):
+        rating_dict[message.from_user.id] = 0
 
 # Handle the /problem command
 @bot.message_handler(commands=['problem'])
