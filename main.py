@@ -5,83 +5,34 @@ import random
 import pickle
 from dotenv import load_dotenv
 
+import generate_task
 
 
-rating_dict = {} # ratind_dict(user) = how many problems have solved
+
+rating_dict = dict() # ratind_dict(user) = how many problems have solved
 rates = [] # how peole rate my bot
 last_messages = dict() # dict of last messages of bot to users
 
+
 def load_data():
+    global rating_dict, rates, last_messages
     try:
         rating_dict = pickle.load(open('rating_dict.pickle', 'rb'))
         rates = pickle.load(open('rates.pickle', 'rb'))
         last_messages = pickle.load(open('last_messages.pickle', 'rb'))
+        print('aboba')
     except Exception:
         rating_dict = dict()
         rates = []
         last_messages = dict()
 
+
 load_data()
+load_dotenv(".env")
 
-key = os.getenv("key") # telebram-bot api-key
-
+key = str(os.getenv("key")) # telebram-bot api-key
 bot = telebot.TeleBot(key)
 
-
-def create_quadratic_problem():
-    '''
-    return list of coefficents and answer
-    '''
-    candidate_1 = random.randint(-15, 15)
-    candidate_2 = random.randint(-15, 15)
-    candidate_3 = random.randint(-15, -1)
-    candidate_4 = random.randint(1, 15)
-    if candidate_1 != 0:
-        x1 = candidate_1
-    else:
-        x1 = candidate_3
-
-    if candidate_2 != 0:
-        x2 = candidate_2
-    else:
-        x2 = candidate_4
-
-    c = x1 * x2
-    b = x1 + x2
-    a = random.choice([1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4, 4, 5])
-    tmp = max(x1, x2)
-    tmp_2 = min(x1, x2)
-    return [a, -b * a, c * a, tmp, tmp_2]
-
-
-def create_plus_problem():
-    '''
-    return list of conditions and answer: +
-    '''
-    x1 = random.randint(10, 200)
-    x2 = random.randint(10, 200)
-    ans = x1 + x2
-    return [x1, x2, ans]
-
-
-def create_minus_problem():
-    '''
-    return list of conditions and answer: -
-    '''
-    x1 = random.randint(10, 200)
-    x2 = random.randint(10, 200)
-    ans = x1 - x2
-    return [x1, x2, ans]
-
-
-def create_multi_problem():
-    '''
-    return list of conditions and answer: *
-    '''
-    x1 = random.randint(5, 20)
-    x2 = random.randint(5, 20)
-    ans = x1 * x2
-    return [x1, x2, ans]
 
 # Handle the /start command
 @bot.message_handler(commands=['start'])
@@ -95,23 +46,23 @@ def send_welcome(message):
 def send_problem(message):
     problem_type = random.choice(['quadratic', 'plus', 'minus', 'multi'])
     if problem_type == 'quadratic':
-        problem = create_quadratic_problem()
+        problem = generate_task.create_quadratic_problem()
         last_messages[message.from_user.id] = [problem[3], problem[4]]
         bot.reply_to(message, f"Solve the quadratic equation: {problem[0]}x^2 + {problem[1]}x + {problem[2]} = 0")
         bot.send_message(message.from_user.id, 'В ответе укажите корни в порядке неубывания.')
 
     elif problem_type == 'plus':
-        problem = create_plus_problem()
+        problem = generate_task.create_plus_problem()
         last_messages[message.from_user.id] = [problem[2]]
         bot.reply_to(message, f"What is the sum of {problem[0]} and {problem[1]}?")
 
     elif problem_type == 'minus':
-        problem = create_minus_problem()
+        problem = generate_task.create_minus_problem()
         last_messages[message.from_user.id] = [problem[2]]
         bot.reply_to(message, f"What is the difference between {problem[0]} and {problem[1]}?")
 
     elif problem_type == 'multi':
-        problem = create_multi_problem()
+        problem = generate_task.create_multi_problem()
         last_messages[message.from_user.id] = [problem[2]]
         bot.reply_to(message, f"What is the product of {problem[0]} and {problem[1]}?")
 
