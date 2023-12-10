@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 import generate_task
 
 
-
 rating_dict = dict() # ratind_dict(user) = how many problems have solved
 rates = [] # how peole rate my bot
 last_messages = dict() # dict of last messages of bot to users
@@ -26,14 +25,13 @@ def load_data():
         rates = []
         last_messages = dict()
 
+def open_data():
+    load_data()
+    load_dotenv(".env")
+    key = str(os.getenv("key")) # telebram-bot api-key
+    bot = telebot.TeleBot(key)
 
-load_data()
-load_dotenv(".env")
-
-key = str(os.getenv("key")) # telebram-bot api-key
-bot = telebot.TeleBot(key)
-
-
+open_data()
 # Handle the /start command
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
